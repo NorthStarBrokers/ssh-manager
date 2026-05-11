@@ -11,11 +11,9 @@ Manages `authorized_keys` entries without ever deleting keys permanently — dis
 Run this on each server:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/ssh-manager/main/ssh-manager.sh \
+curl -fsSL https://raw.githubusercontent.com/NorthStarBrokers/ssh-manager/main/ssh-manager.sh \
   -o /usr/local/bin/ssh-manager && chmod +x /usr/local/bin/ssh-manager
 ```
-
-> Replace `YOUR-ORG` with your GitHub organization name.
 
 **Requirements:** `bash`, `ssh-keygen` — both present on any standard Linux / Bitnami EC2.
 
