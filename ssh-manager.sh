@@ -78,14 +78,14 @@ cmd_list() {
 
   if [[ $found -eq 0 ]]; then
     warn "No collaborators registered yet."
-    echo "  Use: $0 add <name>"
+    echo "  Use: ssh-manager add <name>"
   fi
   echo ""
 }
 
 cmd_add() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 add <name> [public-key]"
+  [[ -z "$name" ]] && die "Usage: ssh-manager add <name> [public-key]"
 
   ensure_dirs
   exists_collab "$name" && die "Collaborator '$name' already exists. Use 'update' to replace their key."
@@ -138,7 +138,7 @@ cmd_add() {
 
 cmd_update() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 update <name> [public-key]"
+  [[ -z "$name" ]] && die "Usage: ssh-manager update <name> [public-key]"
 
   ensure_dirs
   exists_collab "$name" || die "Collaborator '$name' not found. Use 'add' to register them first."
@@ -203,7 +203,7 @@ cmd_update() {
 
 cmd_enable() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 enable <name>"
+  [[ -z "$name" ]] && die "Usage: ssh-manager enable <name>"
   ensure_dirs
   exists_collab "$name" || die "Collaborator '$name' not found."
 
@@ -221,7 +221,7 @@ cmd_enable() {
 
 cmd_disable() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 disable <name>"
+  [[ -z "$name" ]] && die "Usage: ssh-manager disable <name>"
   ensure_dirs
   exists_collab "$name" || die "Collaborator '$name' not found."
 
@@ -239,7 +239,7 @@ cmd_disable() {
 
 cmd_remove() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 remove <name>"
+  [[ -z "$name" ]] && die "Usage: ssh-manager remove <name>"
   ensure_dirs
   exists_collab "$name" || die "Collaborator '$name' not found."
 
@@ -256,7 +256,7 @@ cmd_remove() {
 
 cmd_show() {
   local name="${1:-}"
-  [[ -z "$name" ]] && die "Usage: $0 show <name>"
+  [[ -z "$name" ]] && die "Usage: ssh-manager show <name>"
   ensure_dirs
   exists_collab "$name" || die "Collaborator '$name' not found."
 
@@ -291,7 +291,7 @@ cmd_backup_list() {
 
 cmd_restore() {
   local file="${1:-}"
-  [[ -z "$file" ]] && die "Usage: $0 restore <backup-filename>"
+  [[ -z "$file" ]] && die "Usage: ssh-manager restore <backup-filename>"
   local path="$BACKUP_DIR/$file"
   [[ -f "$path" ]] || die "Backup not found: $path"
 
@@ -308,37 +308,33 @@ cmd_restore() {
 
 cmd_help() {
   echo ""
-  echo -e "${BOLD}  ssh-manager — SSH access manager for collaborators${RESET}"
+  echo -e "  ${BOLD}╔══════════════════════════════════════════╗${RESET}"
+  echo -e "  ${BOLD}║        ssh-manager  v1.0                 ║${RESET}"
+  echo -e "  ${BOLD}║  SSH access manager for collaborators    ║${RESET}"
+  echo -e "  ${BOLD}╚══════════════════════════════════════════╝${RESET}"
   echo ""
-  echo "  Usage: $0 <command> [arguments]"
+  echo -e "  ${BOLD}Usage:${RESET}  ssh-manager <command> [name] [key]"
   echo ""
-  echo -e "  ${CYAN}Main commands:${RESET}"
-  echo "    list               List all collaborators and their status"
-  echo "    add    <name>      Add a collaborator (3 input modes, see below)"
-  echo "    update <name>      Replace a collaborator's SSH key (keeps enabled/disabled state)"
-  echo "    enable  <name>     Enable SSH access"
-  echo "    disable <name>     Disable SSH access (key is kept, not deleted)"
-  echo "    remove  <name>     Permanently remove a collaborator"
-  echo "    show    <name>     Show details for a collaborator"
+  echo -e "  ${CYAN}┌─ Collaborators ────────────────────────────────────────────┐${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}list${RESET}              List all collaborators and their status  ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}add    <name>${RESET}     Add a new collaborator                   ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}update <name>${RESET}     Replace a collaborator's SSH key         ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}enable <name>${RESET}     Enable SSH access                        ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}disable <name>${RESET}    Disable SSH access (key kept on file)    ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}remove <name>${RESET}     Permanently delete a collaborator        ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}show <name>${RESET}       Show details and fingerprint             ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}└────────────────────────────────────────────────────────────┘${RESET}"
   echo ""
-  echo -e "  ${CYAN}Backups:${RESET}"
-  echo "    backups            List available authorized_keys backups"
-  echo "    restore <file>     Restore a specific backup"
+  echo -e "  ${CYAN}┌─ Backups ──────────────────────────────────────────────────┐${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}backups${RESET}           List available backups                  ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${GREEN}restore <file>${RESET}    Restore a specific backup               ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}└────────────────────────────────────────────────────────────┘${RESET}"
   echo ""
-  echo -e "  ${CYAN}Environment variables:${RESET}"
-  echo "    SSH_DIR    SSH directory       (default: ~/.ssh)"
-  echo "    KEYS_DIR   Public keys folder  (default: ~/.ssh/collaborators)"
-  echo ""
-  echo -e "  ${CYAN}add / update — 3 input modes:${RESET}"
-  echo "    $0 add    juan                                # interactive: prompts to paste the key"
-  echo "    $0 add    juan 'ssh-ed25519 AAAA...'          # key passed directly as argument"
-  echo "    echo 'ssh-ed25519 AAAA...' | $0 add    juan  # key via stdin / pipe"
-  echo "    $0 update juan 'ssh-ed25519 AAAA_new...'     # same modes work for update"
-  echo ""
-  echo -e "  ${CYAN}More examples:${RESET}"
-  echo "    $0 disable juan"
-  echo "    $0 enable  juan"
-  echo "    $0 list"
+  echo -e "  ${CYAN}┌─ add / update accept 3 input modes ───────────────────────┐${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${YELLOW}ssh-manager add juan${RESET}                    ← interactive    ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${YELLOW}ssh-manager add juan 'ssh-ed25519 AAAA...'${RESET} ← inline key   ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}│${RESET}  ${YELLOW}echo 'ssh-ed25519 AAAA...' | ssh-manager add juan${RESET} ← pipe  ${CYAN}│${RESET}"
+  echo -e "  ${CYAN}└────────────────────────────────────────────────────────────┘${RESET}"
   echo ""
 }
 
